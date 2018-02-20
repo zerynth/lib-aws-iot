@@ -1,0 +1,18 @@
+{
+    "files": [
+        [
+            "iot",
+            "iot.py"
+        ],
+        [
+            "jobs",
+            "jobs.py"
+        ],
+        [
+            "fota",
+            "fota.py"
+        ]
+    ],
+    "title": "AWS",
+    "version": ""
+}
