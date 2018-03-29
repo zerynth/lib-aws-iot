@@ -3,18 +3,18 @@
     "description": "AWS IoT support",
     "fullname": "lib.aws.iot",
     "git_pointer": "zerynth://zerynth-libs/aws-iot",
+    "info": {
+        "chip_manufacturer": "-",
+        "chip_name": "-",
+        "name": "Zerynth AWS IoT Library",
+        "type": "IoT Cloud"
+    },
     "keywords": [
         "aws",
         "iot"
     ],
     "repo": "official",
     "title": "AWS IoT Library",
-    "version": "r2.0.11",
-    "whatsnew": "",
-    "info":{
-        "name":"Zerynth AWS IoT Library",
-        "type":"IoT Cloud",
-        "chip_name":"-",
-        "chip_manufacturer":"-"
-    }
+    "version": "r2.1.0",
+    "whatsnew": ""
 }
