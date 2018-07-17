@@ -29,6 +29,8 @@ The Thing class
         The Thing object will contain an mqtt client instance pointing to AWS IoT MQTT broker located at :samp:`endpoint` endpoint.
         The client is configured with :samp:`mqtt_id` as MQTT id and is able to connect securely through AWS authorized :samp:`pkey` private key and :samp:`clicert` certificate (an optional :samp:`cacert` CA Certificate can also be passed).
 
+        :ref:`Refer to Zerynth SSL Context creation <stdlib.ssl.create_ssl_context>` for admitted :samp:`pkey` values.
+
         The client is accessible through :samp:`mqtt` instance attribute and exposes all :ref:`Zerynth MQTT Client methods <lib.zerynth.mqtt>` so that it is possible, for example, to setup
         custom callback on MQTT commands.
         The only difference concerns mqtt.connect method which does not require broker url and ssl context, taking them from Thing configuration::

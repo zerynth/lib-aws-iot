@@ -1,5 +1,6 @@
 #AWS
     ##IOT
         Controlled_publish_period
+        HWCrypto_Controller_publish_period
     ##FOTA
         FOTA_aws

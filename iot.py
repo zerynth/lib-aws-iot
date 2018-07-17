@@ -2,7 +2,7 @@
 # @Author: lorenzo
 # @Date:   2017-09-21 16:17:16
 # @Last Modified by:   Lorenzo
-# @Last Modified time: 2018-01-18 15:04:16
+# @Last Modified time: 2018-06-27 17:17:25
 
 """
 .. module:: iot
@@ -41,9 +41,8 @@ class AWSMQTTClient(mqtt.Client):
         self.endpoint = endpoint
         self.ssl_ctx = ssl_ctx
 
-    def connect(self, port=8883):
-        mqtt.Client.connect(self, self.endpoint, 60, port=port, ssl_ctx=self.ssl_ctx)
-
+    def connect(self, port=8883, sock_keepalive=None, aconnect_cb=None):
+        mqtt.Client.connect(self, self.endpoint, 60, port=port, ssl_ctx=self.ssl_ctx, sock_keepalive=sock_keepalive, aconnect_cb=aconnect_cb)
 
 class Thing:
     """
@@ -57,6 +56,8 @@ The Thing class
 
         The Thing object will contain an mqtt client instance pointing to AWS IoT MQTT broker located at :samp:`endpoint` endpoint.
         The client is configured with :samp:`mqtt_id` as MQTT id and is able to connect securely through AWS authorized :samp:`pkey` private key and :samp:`clicert` certificate (an optional :samp:`cacert` CA Certificate can also be passed).
+
+        :ref:`Refer to Zerynth SSL Context creation <stdlib.ssl.create_ssl_context>` for admitted :samp:`pkey` values.
 
         The client is accessible through :samp:`mqtt` instance attribute and exposes all :ref:`Zerynth MQTT Client methods <lib.zerynth.mqtt>` so that it is possible, for example, to setup
         custom callback on MQTT commands.
