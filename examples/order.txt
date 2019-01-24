@@ -2,5 +2,6 @@
     ##IOT
         Controlled_publish_period
         HWCrypto_Controller_publish_period
+        Cloud15Lines
     ##FOTA
         FOTA_aws

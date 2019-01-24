@@ -1,0 +1,4 @@
+---
+config:
+    ZERYNTH_HWCRYPTO_ATECCx08A: null
+...

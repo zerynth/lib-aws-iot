@@ -1,0 +1,8 @@
+{
+    "endpoint": "",
+    "mqttid": "",
+    "crypto_drv": 0,
+    "crypto_addr": 0,
+    "crypto_slot": 0,
+    "crypto_clock": 400000
+}

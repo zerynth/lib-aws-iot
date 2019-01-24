@@ -11,6 +11,10 @@
         [
             "fota",
             "fota.py"
+        ],
+        [
+            "default_credentials",
+            "default_credentials.py"
         ]
     ],
     "title": "AWS",
