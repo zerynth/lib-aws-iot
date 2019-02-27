@@ -2,7 +2,7 @@
 # @Author: lorenzo
 # @Date:   2017-09-21 16:17:16
 # @Last Modified by:   Lorenzo
-# @Last Modified time: 2018-10-22 13:21:59
+# @Last Modified time: 2019-02-21 17:45:37
 
 """
 .. module:: iot
@@ -90,8 +90,8 @@ class AWSMQTTClient(mqtt.Client):
         self.endpoint = endpoint
         self.ssl_ctx = ssl_ctx
 
-    def connect(self, port=8883, sock_keepalive=None, aconnect_cb=None):
-        mqtt.Client.connect(self, self.endpoint, 60, port=port, ssl_ctx=self.ssl_ctx, sock_keepalive=sock_keepalive, aconnect_cb=aconnect_cb)
+    def connect(self, port=8883, sock_keepalive=None, aconnect_cb=None, breconnect_cb=None):
+        mqtt.Client.connect(self, self.endpoint, 60, port=port, ssl_ctx=self.ssl_ctx, sock_keepalive=sock_keepalive, aconnect_cb=aconnect_cb, breconnect_cb=breconnect_cb)
 
     def publish(self, topic, payload=None):
         if type(payload) == PDICT:
