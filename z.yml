@@ -1,0 +1,13 @@
+---
+description: AWS IoT support
+fullname: lib.aws.iot
+info:
+    chip_manufacturer: '-'
+    chip_name: '-'
+    name: Zerynth AWS IoT Library
+    type: IoT Cloud
+keywords:
+- aws
+- iot
+title: AWS IoT Library
+...
