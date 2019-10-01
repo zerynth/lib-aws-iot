@@ -11,7 +11,11 @@ The Zerynth AWS IoT Jobs Library can be used to handle `IoT Jobs <https://docs.a
 
 import threading
 import json
+#-if AWSCLOUD_LWMQTT
+from lwmqtt import mqtt
+#-else
 from mqtt import mqtt
+#-endif
 
 class Jobs():
     """
@@ -34,15 +38,20 @@ Jobs class
         self.chprefix = "$aws/things/"+self.thing.thingname+"/jobs"
         self.topic = self.chprefix+"/get/accepted"
         #subscribe to notify
+#-if !AWSCLOUD_LWMQTT
         self.thing.mqtt.subscribe([[self.chprefix+"/notify", 0]])
         self.thing.mqtt.on(mqtt.PUBLISH, self._handle_notify, self._is_notify)
+#-else
+        self.thing.mqtt.subscribe(self.chprefix+"/notify", self._handle_notify)
+#-endif
         self._changed = False
 
+#-if !AWSCLOUD_LWMQTT
     def _is_notify(self,data):
         if 'message' in data:
             return data['message'].topic.startswith(self.chprefix+"/notify")
         return False
-
+#-endif
 
     def _handle_notify(self,client,data):
         self._changed = True
@@ -59,14 +68,20 @@ Jobs class
         self._changed = False
         return ret
 
-    def _handle_job(self,client,data):
+    def _handle_job(self,client,data,topic=None):
+#-if !AWSCLOUD_LWMQTT
         self.job_data = json.loads(data["message"].payload)
+#-else
+        self.job_data = json.loads(data)
+#-endif
         self.evt.set()
 
+#-if !AWSCLOUD_LWMQTT
     def _is_job(self,data):
         if 'message' in data:
             return data['message'].topic.startswith(self.topic)
         return False
+#-endif
 
     def list(self):
         """
@@ -78,15 +93,22 @@ Jobs class
 
         """
         self.job_data = None
+#-if !AWSCLOUD_LWMQTT
         self.thing.mqtt.subscribe([[self.topic, 0]])
         self.thing.mqtt.on(mqtt.PUBLISH, self._handle_job, self._is_job)
-
+#-else
+        self.thing.mqtt.subscribe(self.topic, self._handle_job)
+#-endif
         msg = {'clientToken': self.thing._client_token}
 
         self.thing.mqtt.publish(self.chprefix+'/get', json.dumps(msg))
         self.evt.wait()
         self.evt.clear()
+#-if !AWSCLOUD_LWMQTT
         self.thing.mqtt.unsubscribe([self.topic])
+#-else
+        self.thing.mqtt.unsubscribe(self.topic)
+#-endif
         inp = []
         inq = []
         if not self.job_data:
@@ -129,23 +151,35 @@ Job class
         self.evt = threading.Event()
 
     def _handle_job(self,client,data):
+#-if !AWSCLOUD_LWMQTT
         self.job_data = json.loads(data["message"].payload)
+#-else
+        self.job_data = json.loads(data)
+#-endif
         self.evt.set()
-        
+
+#-if !AWSCLOUD_LWMQTT        
     def _is_job(self,data):
         if 'message' in data:
             return data['message'].topic.startswith(self.chprefix)
         return False
-    
+#-endif
+
     def _handle_upd_job(self,client,data):
+#-if !AWSCLOUD_LWMQTT        
         upd = json.loads(data["message"].payload)
-        self.job_data = upd["status"]
+#-else
+        upd = json.loads(data)
+#-endif
+        self.job_data = upd["executionState"]["status"]
         self.evt.set()
-        
+
+#-if !AWSCLOUD_LWMQTT        
     def _is_upd_job(self,data):
         if 'message' in data:
-            return data['message'].topic.startswith(self.chprefix+"/updated")
+            return data['message'].topic.startswith(self.chprefix+"/update")
         return False
+#-endif
 
     def describe(self):
         """
@@ -159,15 +193,22 @@ Job class
 
         """
         self.job_data = None
+#-if !AWSCLOUD_LWMQTT        
         self.thing.mqtt.subscribe([[self.chprefix+"/get/accepted", 0]])
         self.thing.mqtt.on(mqtt.PUBLISH, self._handle_job, self._is_job)
+#-else
+        self.thing.mqtt.subscribe(self.chprefix+"/get/accepted",self._handle_job)
+#-endif
 
         msg = {'clientToken': self.thing._client_token}
-
         self.thing.mqtt.publish(self.chprefix+'/get', json.dumps(msg))
         self.evt.wait()
         self.evt.clear()
+#-if !AWSCLOUD_LWMQTT        
         self.thing.mqtt.unsubscribe([self.chprefix+"/get/accepted"])
+#-else
+        self.thing.mqtt.unsubscribe(self.chprefix+"/get/accepted")
+#-endif
         if self.job_data is None:
             return False
         try:
@@ -198,24 +239,29 @@ Job class
 
         """
         self.job_data = ""
-        self.thing.mqtt.subscribe([[self.chprefix+"/updated/#", 0]])
+#-if !AWSCLOUD_LWMQTT 
+        self.thing.mqtt.subscribe([[self.chprefix+"/update/", 0]])
         self.thing.mqtt.on(mqtt.PUBLISH, self._handle_upd_job, self._is_upd_job)
+#-else
+        self.thing.mqtt.subscribe(self.chprefix+"/update/#",self._handle_upd_job)
+#-endif
         msg = {
             "status":status,
             "statusDetails":status_details,
             "expectedVersion":self.version,
+            "includeJobExecutionState": True,
+            # "includeJobDocument": True
         }
         self.thing.mqtt.publish(self.chprefix+'/update', json.dumps(msg))
         self.evt.wait()
         self.evt.clear()
-        self.thing.mqtt.unsubscribe([self.chprefix+"/updated/#"])
+#-if !AWSCLOUD_LWMQTT        
+        self.thing.mqtt.unsubscribe([self.chprefix+"/update/#"])
+#-else
+        self.thing.mqtt.unsubscribe(self.chprefix+"/update/#")
+#-endif
         return self.job_data == status
 
     
     def __str__(self):
         return self.jobid+"@"+self.thing.thingname
-
-
-
-
-

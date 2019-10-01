@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 # @Author: lorenzo
 # @Date:   2017-09-21 16:17:16
-# @Last Modified by:   Lorenzo
-# @Last Modified time: 2019-02-21 17:45:37
+# @Last Modified by:   m.cipriani
+# @Last Modified time: 2019-09-11 14:49:32
 
 """
 .. module:: iot
@@ -28,7 +28,11 @@ Check this video for a live demo:
 
 import json
 import ssl
+#-if AWSCLOUD_LWMQTT
+from lwmqtt import mqtt
+#-else
 from mqtt import mqtt
+#-endif
 
 import mcu
 
@@ -89,10 +93,13 @@ class AWSMQTTClient(mqtt.Client):
         mqtt.Client.__init__(self, mqtt_id, clean_session=True)
         self.endpoint = endpoint
         self.ssl_ctx = ssl_ctx
-
+#-if AWSCLOUD_LWMQTT
+    def connect(self, port=8883, sock_keepalive=None, aconnect_cb=None, breconnect_cb=None, loop_failure=None):
+        mqtt.Client.connect(self, self.endpoint, 60, port=port, ssl_ctx=self.ssl_ctx, sock_keepalive=sock_keepalive, aconnect_cb=aconnect_cb, breconnect_cb=breconnect_cb, loop_failure=None)
+#-else
     def connect(self, port=8883, sock_keepalive=None, aconnect_cb=None, breconnect_cb=None):
         mqtt.Client.connect(self, self.endpoint, 60, port=port, ssl_ctx=self.ssl_ctx, sock_keepalive=sock_keepalive, aconnect_cb=aconnect_cb, breconnect_cb=breconnect_cb)
-
+#-endif
     def publish(self, topic, payload=None):
         if type(payload) == PDICT:
             payload = json.dumps(payload)
@@ -152,15 +159,24 @@ The Thing class
         shadow_rep = { 'state': { 'reported': state }}
         self.mqtt.publish('$aws/things/' + self.thingname + '/shadow/update', json.dumps(shadow_rep))
 
+#-if !AWSCLOUD_LWMQTT
     def _is_shadow_delta(self, mqtt_data):
         if ('message' in mqtt_data):
             return (mqtt_data['message'].topic == ('$aws/things/' + self.thingname + '/shadow/update/delta'))
         return False
+#-endif
 
+#-if !AWSCLOUD_LWMQTT
     def _handle_shadow_request(self, mqtt_client, mqtt_data):
         reported = self._shadow_cbk(json.loads(mqtt_data['message'].payload)['state'])
         if reported is not None:
             self.update_shadow(reported)
+#-else
+    def _handle_shadow_request(self, mqtt_client, payload):
+        reported = self._shadow_cbk(json.loads(payload)['state'])
+        if reported is not None:
+            self.update_shadow(reported)
+#-endif
 
     def on_shadow_request(self, shadow_cbk):
         """
@@ -178,8 +194,13 @@ The Thing class
         If a dictionary is returned, it is automatically published as reported state.
         """
         if self._shadow_cbk is None:
+#-if !AWSCLOUD_LWMQTT
             self.mqtt.subscribe([['$aws/things/' + self.thingname + '/shadow/update/delta',0]])
+#-else
+            self.mqtt.subscribe('$aws/things/' + self.thingname + '/shadow/update/delta', self._handle_shadow_request)
+#-endif
         self._shadow_cbk = shadow_cbk
+#-if !AWSCLOUD_LWMQTT
         self.mqtt.on(mqtt.PUBLISH, self._handle_shadow_request, self._is_shadow_delta)
-
+#-endif
 
