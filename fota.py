@@ -107,7 +107,7 @@ def update(fota_data):
     global next_bcaddr
     global bcsize
     # setup 
-    awscert = __lookup(SSL_CACERT_BALTIMORE_CYBERTRUST_ROOT)
+    awscert = __lookup(BALTIMORE_CYBERTRUST_ROOT)
     ctx = ssl.create_ssl_context(cacert=awscert,options=ssl.CERT_REQUIRED|ssl.SERVER_AUTH)
     record = fota.get_record()
     chunk = record[8]
